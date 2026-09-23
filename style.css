@@ -95,3 +95,4 @@ em { font-style: normal; }
 .tb-dash { right: 14px; bottom: 16px; }
 .tb-od { right: 56px; bottom: 36px; background: rgba(177, 62, 83, .6); box-shadow: 0 0 0 1px #ffcd75; }
 .tb-pause { left: 230px; top: 27px; width: 20px; height: 16px; border-radius: 0; }
+.ctrl-hint { color: #73eff7; text-shadow: 1px 1px 0 #1a1c2c; }

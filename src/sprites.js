@@ -273,10 +273,13 @@ function buildSprites() {
 const _bcache = {}, _gcache = {};
 function bulletSprite(color, r) {
   const key = color + r; if (_bcache[key]) return _bcache[key];
-  const s = r * 2 + 1, c = newCanvas(s, s), x = c.getContext('2d');
+  // hostile orb: dark outline ring + colored body + white core
+  const R = r + 1, s = R * 2 + 1, c = newCanvas(s, s), x = c.getContext('2d');
   for (let j = 0; j < s; j++) for (let i = 0; i < s; i++) {
-    const dx = i - r, dy = j - r, d = Math.sqrt(dx * dx + dy * dy);
-    if (d <= r + 0.3) { x.fillStyle = d <= r - 1.2 ? '#ffffff' : color; x.fillRect(i, j, 1, 1); }
+    const dx = i - R, dy = j - R, d = Math.sqrt(dx * dx + dy * dy);
+    if (d > r + 1.3) continue;
+    x.fillStyle = d > r + 0.3 ? '#12061a' : d <= Math.max(0.5, r - 1.5) ? '#ffffff' : color;
+    x.fillRect(i, j, 1, 1);
   }
   return (_bcache[key] = c);
 }
