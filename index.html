@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="description" content="终焉防火墙 LAST FIREWALL — 像素风生存弹幕射击游戏。守住人类最后的记忆核心。">
+<meta name="theme-color" content="#0a0b16">
+<title>终焉防火墙 · LAST FIREWALL</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'><rect width='8' height='8' fill='%231a1c2c'/><rect x='1' y='1' width='6' height='3' fill='%233b5dc9'/><rect x='2' y='2' width='4' height='1' fill='%2373eff7'/><rect x='1' y='5' width='6' height='1' fill='%23ef7d57'/></svg>">
+<link rel="preload" href="assets/fusion-pixel-12.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game" width="480" height="270"></canvas>
+
+  <div id="loading" class="ov"><div class="blink">LOADING...</div></div>
+
+  <div id="title" class="ov hidden">
+    <div class="logo">
+      <div class="t1">终焉防火墙</div>
+      <div class="t2">L A S T &nbsp; F I R E W A L L</div>
+    </div>
+    <div class="tagline">像素生存弹幕射击 · 守住人类最后的记忆核心</div>
+    <div class="menu">
+      <button class="btn primary" data-act="start">&gt; 开始守夜</button>
+      <button class="btn" data-act="story">背景故事</button>
+      <button class="btn" data-act="help">操作说明</button>
+    </div>
+    <div class="best" id="best"></div>
+    <div class="hint blink">按 ENTER 开始</div>
+  </div>
+
+  <div id="story" class="ov hidden">
+    <div class="story-box">
+      <div class="story-head">// SYSTEM LOG 2099.12.31 23:59</div>
+      <div id="story-text"></div>
+    </div>
+    <div id="story-skip" class="hint"></div>
+  </div>
+
+  <div id="help" class="ov hidden">
+    <div class="panel">
+      <div class="ptitle">操作说明</div>
+      <div class="cols">
+        <div>
+          <p><b>WASD / 方向键</b> 移动</p>
+          <p><b>鼠标</b> 瞄准（自动开火）</p>
+          <p><b>SHIFT / 右键</b> 冲刺（无敌）</p>
+          <p><b>SPACE</b> 燃魂超载</p>
+          <p><b>Q</b> 切换自动瞄准</p>
+          <p><b>ESC / P</b> 暂停　<b>M</b> 静音</p>
+          <p class="dim">手机：左侧拖动移动，自动瞄准</p>
+        </div>
+        <div>
+          <p><em class="c-y">金币</em> 每突破一个阈值，获得一次<b>强化</b>，从三张协议卡中选一：<em class="c-b">加成</em> / <em class="c-o">弹幕</em> / <em class="c-p">召唤</em></p>
+          <p><em class="c-c">能量</em> 击杀与擦弹积攒，满格后释放<b>超载</b>：清屏冲击波 + 双倍火力 + 螺旋弹幕</p>
+          <p><em class="c-r">连击</em> 越高金币越多，受伤会中断</p>
+          <p>每 2~3 分钟会有 <em class="c-r">BOSS</em> 入侵</p>
+        </div>
+      </div>
+      <button class="btn" data-act="title">返回</button>
+    </div>
+  </div>
+
+  <div id="upgrade" class="ov hidden">
+    <div class="up-title">强化协议 · 选择一项</div>
+    <div id="up-sub" class="dim"></div>
+    <div id="cards"></div>
+    <button id="btn-reroll" class="btn small" data-act="reroll">重抽</button>
+  </div>
+
+  <div id="pause" class="ov hidden">
+    <div class="panel">
+      <div class="ptitle">暂停</div>
+      <div id="pause-stats" class="dim"></div>
+      <div id="build"></div>
+      <div class="menu row">
+        <button class="btn primary" data-act="resume">继续</button>
+        <button class="btn" id="btn-aim" data-act="aim">瞄准</button>
+        <button class="btn" id="btn-mute" data-act="mute">声音</button>
+        <button class="btn" data-act="restart">重新开始</button>
+        <button class="btn" data-act="title">标题</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="over" class="ov hidden">
+    <div class="over-title">防火墙 · 已被击穿</div>
+    <div class="dim">但你为人类争取了宝贵的时间……</div>
+    <div id="over-stats"></div>
+    <div id="over-rank"></div>
+    <div class="menu row">
+      <button class="btn primary" data-act="restart">再战一次 [ENTER]</button>
+      <button class="btn" data-act="title">返回标题</button>
+    </div>
+  </div>
+
+  <div id="touch">
+    <button class="tbtn tb-pause" data-act="pause">II</button>
+    <button class="tbtn tb-dash" data-act="dash">冲</button>
+    <button class="tbtn tb-od" data-act="od">燃</button>
+  </div>
+</div>
+<script src="src/audio.js"></script>
+<script src="src/sprites.js"></script>
+<script src="src/game.js"></script>
+</body>
+</html>
