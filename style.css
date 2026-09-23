@@ -57,7 +57,7 @@ em { font-style: normal; }
 .chip.t-boost { color: #41a6f6; } .chip.t-barrage { color: #ef7d57; } .chip.t-summon { color: #c070f0; }
 
 /* upgrade cards */
-#upgrade { background: rgba(8, 9, 20, .72); gap: 4px; }
+#upgrade { background: rgba(8, 9, 20, .86); gap: 4px; }
 .up-title { font-size: 24px; line-height: 24px; color: #ffcd75; text-shadow: 2px 2px 0 #b13e53, 3px 3px 0 #1a1c2c; animation: drop .25s steps(4) both; }
 #cards { display: flex; gap: 10px; margin: 4px 0; }
 .card { --c: #41a6f6; --d: #29366f; position: relative; width: 128px; height: 166px; padding: 18px 6px 6px; background: #0e1022; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px;
@@ -94,5 +94,9 @@ em { font-style: normal; }
 .tbtn { position: absolute; font: inherit; color: #f4f4f4; background: rgba(41, 54, 111, .55); border: 0; box-shadow: 0 0 0 1px #73eff7aa; width: 34px; height: 34px; border-radius: 50%; font-size: 12px; }
 .tb-dash { right: 14px; bottom: 16px; }
 .tb-od { right: 56px; bottom: 36px; background: rgba(177, 62, 83, .6); box-shadow: 0 0 0 1px #ffcd75; }
-.tb-pause { left: 230px; top: 27px; width: 20px; height: 16px; border-radius: 0; }
+.tb-pause { left: 4px; top: 24px; width: 20px; height: 16px; border-radius: 0; }
 .ctrl-hint { color: #73eff7; text-shadow: 1px 1px 0 #1a1c2c; }
+#cards.locked .card { filter: brightness(.5) saturate(.3); cursor: wait; pointer-events: none; }
+#cards.locked .card .key { visibility: hidden; }
+.card.sel { transform: translateY(-4px); background: #1d2246; box-shadow: 0 0 0 1px #f4f4f4, 0 0 0 2px var(--c), 0 0 0 3px #1a1c2c, 3px 6px 0 2px #05060d; }
+.card.sel .key { color: #ffcd75; animation: blink .5s steps(2) infinite; }
