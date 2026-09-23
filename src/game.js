@@ -722,10 +722,16 @@ function updatePickups(dt) {
     const k = ks[i]; k.t += dt;
     const dx = p.x - k.x, dy = p.y - k.y, d = Math.hypot(dx, dy) || 1;
     if (!k.attract && k.type !== 'heart' && k.t > 0.9 && d < 260) k.attract = true;
-    if (!G.dying && (k.attract || d < mag)) { k.attract = true; const a = 900 + k.t * 200; k.vx += dx / d * a * dt; k.vy += dy / d * a * dt; const s = Math.hypot(k.vx, k.vy), mx = 340; if (s > mx) { k.vx *= mx / s; k.vy *= mx / s; } }
-    else { const dr = Math.exp(-dt * 4); k.vx *= dr; k.vy *= dr; }
-    k.x += k.vx * dt; k.y += k.vy * dt;
-    if (!G.dying && d < 8) {
+    let got = false;
+    if (!G.dying && (k.attract || d < mag)) {
+      // direct homing (no orbiting): fly straight at the player, accelerating, and get absorbed on arrival
+      if (!k.attract || k.at === undefined) { k.attract = true; k.at = 0; }
+      k.at += dt;
+      const sp = Math.min(520, 150 + k.at * 900) + Math.hypot(p.vx, p.vy), step = sp * dt;
+      if (d <= step + 6) got = true;
+      else { k.vx = dx / d * sp; k.vy = dy / d * sp; k.x += k.vx * dt; k.y += k.vy * dt; }
+    } else { const dr = Math.exp(-dt * 4); k.vx *= dr; k.vy *= dr; k.x += k.vx * dt; k.y += k.vy * dt; }
+    if (got || (!G.dying && d < 8)) {
       if (k.type === 'coin') { G.coins += k.v; onMilestone(); Sound.sfx.coin(); part({ x: k.x, y: k.y, vx: 0, vy: -20, life: 0.2, max: 0.2, color: '#ffcd75', size: 1, drag: 1 }); }
       else if (k.type === 'energy') { G.energy = Math.min(100, G.energy + k.v * 0.9 * S.energyMul); Sound.sfx.energy(); }
       else { p.hp = Math.min(p.maxHp, p.hp + k.v); floatText(p.x, p.y - 14, '+' + k.v, '#a7f070', 0.8); Sound.sfx.heal(); burst(p.x, p.y, 10, ['#a7f070', '#38b764', '#f4f4f4'], 60, 0.5, 1); }
