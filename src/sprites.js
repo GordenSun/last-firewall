@@ -284,8 +284,11 @@ function bulletSprite(color, r) {
   return (_bcache[key] = c);
 }
 function hexRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
-function glowSprite(color, R, a = 0.5) {
-  const key = color + R + a; if (_gcache[key]) return _gcache[key];
+// Cached per (color, radius) only — NEVER put a varying alpha in the key (that leaked a new canvas
+// every frame and exhausted GPU memory after a few minutes). Fade at draw time via drawGlow().
+function glowSprite(color, R, a = 1) {
+  R = Math.max(2, Math.round(R));
+  const key = color + '|' + R + '|' + a; if (_gcache[key]) return _gcache[key];
   const s = R * 2, c = newCanvas(s, s), x = c.getContext('2d');
   const [rr, gg, bb] = hexRgb(color);
   for (let j = 0; j < s; j++) for (let i = 0; i < s; i++) {
@@ -295,6 +298,13 @@ function glowSprite(color, R, a = 0.5) {
     x.fillStyle = `rgba(${rr},${gg},${bb},${(q * q * a).toFixed(3)})`; x.fillRect(i, j, 1, 1);
   }
   return (_gcache[key] = c);
+}
+function drawGlow(ctx, color, R, a, x, y) {
+  if (a <= 0.01) return;
+  R = Math.max(2, Math.round(R));
+  const pa = ctx.globalAlpha; ctx.globalAlpha = pa * Math.min(1, a);
+  ctx.drawImage(glowSprite(color, R), x - R, y - R);
+  ctx.globalAlpha = pa;
 }
 
 // --- background tiles ---

@@ -17,11 +17,12 @@ const joy = { id: null, ox: 0, oy: 0, x: 0, y: 0, active: false };
 
 // ============ text rendering (pixel font, cached) ============
 const tcache = new Map();
+let MEASURE = null;
 function textSpr(str, color, size, outline) {
   const key = str + '|' + color + '|' + size + '|' + outline;
   let c = tcache.get(key); if (c) return c;
-  if (tcache.size > 2500) tcache.clear();
-  const m = newCanvas(1, 1).getContext('2d'); m.font = size + 'px FP';
+  if (tcache.size > 600) tcache.clear();
+  const m = MEASURE || (MEASURE = newCanvas(1, 1).getContext('2d')); m.font = size + 'px FP';
   const w = Math.ceil(m.measureText(str).width) + 4;
   c = newCanvas(w, size + 4); const x = c.getContext('2d');
   x.font = size + 'px FP'; x.textBaseline = 'top';
@@ -833,7 +834,7 @@ function drawSet(set, f, x, y, face, white, gold) {
 function drawBoss(e) {
   const x = sx(e.x), y = sy(e.y), B = e.B, fl = e.flash > 0, t = e.t;
   const pulse = Math.round(Math.sin(t * 6) * 1);
-  ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(glowSprite(B.c2, 40, 0.35), x - 40, y - 40); ctx.globalCompositeOperation = 'source-over';
+  ctx.globalCompositeOperation = 'lighter'; drawGlow(ctx, B.c2, 40, 0.35, x, y); ctx.globalCompositeOperation = 'source-over';
   ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(x - 16, y + 18, 32, 3);
   const n = 10;
   for (let k = 0; k < n; k++) {
@@ -889,7 +890,7 @@ function drawPlayer() {
   const bob = p.moving ? (((p.walk | 0) % 2) ? -1 : 0) : 0;
   if (G.od > 0) {
     ctx.globalCompositeOperation = 'lighter';
-    ctx.drawImage(glowSprite('#ffcd75', 22, 0.45 + Math.sin(G.t * 20) * 0.15), x - 22, y - 22);
+    drawGlow(ctx, '#ffcd75', 22, 0.45 + Math.sin(G.t * 20) * 0.15, x, y);
     ctx.globalCompositeOperation = 'source-over';
   }
   ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(x - 4, y + 6, 9, 2);
@@ -916,14 +917,14 @@ function drawSummons() {
   }
   for (let i = 0; i < (G.up.drone || 0); i++) {
     const d = G.drones[i]; if (!d) continue;
-    ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(glowSprite('#41a6f6', 7, 0.4), sx(d.x) - 7, sy(d.y) - 7); ctx.globalCompositeOperation = 'source-over';
+    ctx.globalCompositeOperation = 'lighter'; drawGlow(ctx, '#41a6f6', 7, 0.4, sx(d.x), sy(d.y)); ctx.globalCompositeOperation = 'source-over';
     drawSet(SPR.drone, (G.t * 20) | 0, sx(d.x), sy(d.y) + Math.round(Math.sin(G.t * 5 + i)), 1);
   }
   if (G.bladePos.length) {
     ctx.globalCompositeOperation = 'lighter';
     for (const [bx, by, a] of G.bladePos) {
       for (let k = 1; k <= 4; k++) { const aa = a - k * 0.09; ctx.fillStyle = `rgba(115,239,247,${0.5 - k * 0.1})`; ctx.fillRect(sx(p.x + Math.cos(aa) * 36) - 1, sy(p.y + Math.sin(aa) * 36) - 1, 3, 3); }
-      ctx.drawImage(glowSprite('#73eff7', 8, 0.5), sx(bx) - 8, sy(by) - 8);
+      drawGlow(ctx, '#73eff7', 8, 0.5, sx(bx), sy(by));
     }
     ctx.globalCompositeOperation = 'source-over';
     for (const [bx, by, a] of G.bladePos) {
@@ -940,10 +941,10 @@ function drawPickups() {
     const x = sx(k.x), y = sy(k.y) + Math.round(Math.sin(k.t * 5) * (k.attract ? 0 : 1));
     if (k.type === 'coin') drawSet(k.big ? SPR.bigcoin : SPR.coin, ((k.t * 6) | 0), x, y, 1);
     else if (k.type === 'energy') {
-      ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(glowSprite('#41a6f6', 6, 0.6), x - 6, y - 6); ctx.globalCompositeOperation = 'source-over';
+      ctx.globalCompositeOperation = 'lighter'; drawGlow(ctx, '#41a6f6', 6, 0.6, x, y); ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = '#73eff7'; ctx.fillRect(x - 1, y - 2, 3, 5); ctx.fillRect(x - 2, y - 1, 5, 3); ctx.fillStyle = '#fff'; ctx.fillRect(x, y - 1, 1, 3);
     } else {
-      if (((k.t * 6) | 0) % 2) { ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(glowSprite('#e04060', 8, 0.5), x - 8, y - 8); ctx.globalCompositeOperation = 'source-over'; }
+      if (((k.t * 6) | 0) % 2) { ctx.globalCompositeOperation = 'lighter'; drawGlow(ctx, '#e04060', 8, 0.5, x, y); ctx.globalCompositeOperation = 'source-over'; }
       drawSet(SPR.heart, 0, x, y, 1);
     }
   }
@@ -956,7 +957,7 @@ function drawPBullets() {
     if (G.bullets.length > 180 && b.kind !== 'missile') break;
     if (!onScreen(b.x, b.y, 10)) continue;
     const g = b.kind === 'missile' ? 6 : 3;
-    ctx.drawImage(glowSprite(b.color, g, 0.3), sx(b.x) - g, sy(b.y) - g);
+    drawGlow(ctx, b.color, g, 0.3, sx(b.x), sy(b.y));
   }
   ctx.globalCompositeOperation = 'source-over';
   ctx.globalAlpha = G.bullets.length > 250 ? 0.6 : 0.85;
@@ -975,7 +976,7 @@ function drawEBullets() {
   ctx.globalCompositeOperation = 'lighter';
   if (G.ebullets.length < 260) for (const b of G.ebullets) {
     if (!onScreen(b.x, b.y, 8)) continue;
-    const g = b.r + 4; ctx.drawImage(glowSprite(b.color, g, pulse), sx(b.x) - g, sy(b.y) - g);
+    drawGlow(ctx, b.color, b.r + 4, pulse, sx(b.x), sy(b.y));
   }
   ctx.globalCompositeOperation = 'source-over';
   for (const b of G.ebullets) {
@@ -1037,12 +1038,12 @@ function drawFx(layer) {
         pline(sx(f.x), sy(f.y) - r - 4, sx(f.x), sy(f.y) - r + 4, 1); pline(sx(f.x), sy(f.y) + r - 4, sx(f.x), sy(f.y) + r + 4, 1);
       }
     } else {
-      if (f.type === 'muzzle') { ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(glowSprite('#ffcd75', 6, 0.9), sx(f.x) - 6, sy(f.y) - 6); ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = '#fff'; ctx.fillRect(sx(f.x) - 1, sy(f.y) - 1, 3, 3); }
+      if (f.type === 'muzzle') { ctx.globalCompositeOperation = 'lighter'; drawGlow(ctx, '#ffcd75', 6, 0.9, sx(f.x), sy(f.y)); ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = '#fff'; ctx.fillRect(sx(f.x) - 1, sy(f.y) - 1, 3, 3); }
       else if (f.type === 'pop') { ctx.fillStyle = k < 0.5 ? '#fff' : '#ffcd75'; disc(sx(f.x), sy(f.y), f.r * (1 - k * 0.5)); }
       else if (f.type === 'boom' && f.small) { ctx.fillStyle = '#ffcd75'; ctx.globalAlpha = 0.8 * (1 - k); ringPx(sx(f.x), sy(f.y), f.R * (0.5 + 0.5 * k), 1); ctx.globalAlpha = 1; }
       else if (f.type === 'boom') {
         const r = f.R * (0.4 + 0.6 * k), X = sx(f.x), Y = sy(f.y);
-        ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(glowSprite('#ef7d57', Math.max(4, Math.round(r * 1.6)), 0.45 * (1 - k)), X - Math.max(4, Math.round(r * 1.6)), Y - Math.max(4, Math.round(r * 1.6))); ctx.globalCompositeOperation = 'source-over';
+        ctx.globalCompositeOperation = 'lighter'; drawGlow(ctx, '#ef7d57', Math.max(4, r * 1.6), 0.45 * (1 - k), X, Y); ctx.globalCompositeOperation = 'source-over';
         ctx.fillStyle = k < 0.3 ? '#fff' : k < 0.6 ? '#ffcd75' : '#ef7d57'; disc(X, Y, r * (1 - k));
         ctx.fillStyle = '#ffcd75'; ctx.globalAlpha = 0.6 * (1 - k); ringPx(X, Y, r, 1); ctx.globalAlpha = 1;
       }
@@ -1063,7 +1064,7 @@ function drawFx(layer) {
         ctx.fillStyle = `rgba(65,166,246,${0.6 * (1 - k)})`; ctx.fillRect(X - w - 4, 0, (w + 4) * 2, Y + 4);
         ctx.fillStyle = `rgba(115,239,247,${0.9 * (1 - k)})`; ctx.fillRect(X - w, 0, w * 2, Y + 2);
         ctx.fillStyle = `rgba(255,255,255,${1 - k})`; ctx.fillRect(X - (w >> 1), 0, w, Y);
-        ctx.drawImage(glowSprite('#73eff7', f.R + 10, 0.8 * (1 - k)), X - f.R - 10, Y - f.R - 10);
+        drawGlow(ctx, '#73eff7', f.R + 10, 0.8 * (1 - k), X, Y);
         ctx.globalCompositeOperation = 'source-over';
       }
     }
@@ -1218,7 +1219,7 @@ function renderTitleBg() {
     for (let i = 0; i < r.l; i++) { ctx.fillStyle = i === 0 ? '#73eff7' : `rgba(65,166,246,${0.5 - i / r.l * 0.5})`; ctx.fillRect(Math.round(r.x), Math.round(r.y) - i * 3, 1, 2); }
   }
   const cx = W / 2, cy = H - 44;
-  ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(glowSprite('#3b5dc9', 40, 0.5), cx - 40, cy - 40); ctx.globalCompositeOperation = 'source-over';
+  ctx.globalCompositeOperation = 'lighter'; drawGlow(ctx, '#3b5dc9', 40, 0.5, cx, cy); ctx.globalCompositeOperation = 'source-over';
   const t = titleT;
   for (let i = 0; i < 7; i++) {
     const a = t * 0.4 + i * TAU / 7, R = 70 + Math.sin(t * 2 + i) * 6;

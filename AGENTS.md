@@ -7,6 +7,7 @@ Pixel-art survival bullet-hell shooter. Plain static site (no build): `index.htm
 - Controls: no keyboard movement. Mouse position relative to screen center steers the hero (`MOVE_DEAD`/`MOVE_RAMP`); aiming is always auto-lock nearest (`G.target`). Touch = floating joystick anywhere; `touchMode` flips on pointer type.
 - Keys: Space/Shift dash, right click/E overdrive, left click does nothing in play. Upgrade cards: `UP_ARM` ms lockout, pointer press must start after arming, touch needs select-then-confirm.
 - Late-game readability LOD (keep when adding effects): hit flash & damage numbers throttle when `G.enemies.length > 90`, small 爆裂弹 explosions are quiet ring-only (max 2/step), halos/glows skip above bullet-count thresholds, frequent notices use `toast()` not `banner()`.
+- Sprite caches (`_gcache`, `_bcache`, `tcache`) hold canvases: keys must come from a small bounded set. Never pass a per-frame varying value (alpha, float radius) into a cached sprite — use `drawGlow(ctx, color, R, alpha, x, y)` which fades via globalAlpha. `.dev/leak.mjs` / `soak.mjs` print cache sizes over time.
 - Bullet readability rule: friendly = cyan/white/gold streaks (drawn under enemies), hostile = `HOSTILE` red/pink/purple outlined orbs (drawn on top). Keep new colors inside these families.
 - Debug URL params: `?bot=1` (auto-play), `&fast=N` (N× sim speed), `&god=1`, `&loop=1`. `window.__dbg` exposes `G`, `state`, `spawnBoss`, `activateOverdrive`.
 
